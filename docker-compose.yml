@@ -35,8 +35,6 @@ services:
       OMNI_HOST_NAME: "{{.Node.Hostname}}"
     volumes:
       - /proc:/rootfs/proc:ro
-    ports:
-      - "8888:8888"
     links:
       - influxdb
     networks:
