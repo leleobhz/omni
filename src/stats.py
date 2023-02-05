@@ -32,7 +32,8 @@ class Stats():
         disk = {
             'used_gb': round(disk.used / (1024.0 ** 3), 2),
             'available_gb': round(disk.free / (1024.0 ** 3), 2),
-            'total_gb': round(disk.total / (1024.0 ** 3), 2)
+            'total_gb': round(disk.total / (1024.0 ** 3), 2),
+            'used_percent': round(((disk.free / disk.total) * 100.0) / (1024.0 ** 3), 2),
         }
 
         return disk
@@ -92,7 +93,8 @@ class Stats():
                     'fields': {
                         'used_gb': disk['used_gb'],
                         'available_gb': disk['available_gb'],
-                        'total_gb': disk['total_gb']
+                        'total_gb': disk['total_gb'],
+                        'used_percent': disk['used_percent'],
                     }
                 },
                 {
