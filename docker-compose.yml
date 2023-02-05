@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:  
+  influxdb:
+    image: influxdb
+    restart: always
+    environment:
+      DOCKER_INFLUXDB_INIT_ORG: &org default_org #Change
+      DOCKER_INFLUXDB_INIT_USERNAME: speaker #Change
+      DOCKER_INFLUXDB_INIT_PASSWORD: speaker-round4-house #Change
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: &admin_token default_admin_token #Change
+      DOCKER_INFLUXDB_INIT_BUCKET: &bucket "Onmi: Cluster monitoring"
+      DOCKER_INFLUXDB_INIT_MODE: setup
+    volumes:
+      - influxdb-data:/var/lib/influxdb2
+    ports:
+      - "8086:8086"
+    networks:
+      - omni
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: [node.role == manager]
+
+  omni:
+    image: mattogodoy/omni:arm
+    restart: always
+    environment:
+      OMNI_INFLUX_URL: http://influxdb:8086
+      OMNI_INFLUX_TOKEN: *admin_token
+      OMNI_INFLUX_BUCKET: *bucket
+      OMNI_INFLUX_ORG:  *org
+      OMNI_DATA_RATE_SECONDS: 5
+      OMNI_HOST_NAME: "{{.Node.Hostname}}"
+    volumes:
+      - /proc:/rootfs/proc:ro
+    ports:
+      - "8888:8888"
+    links:
+      - influxdb
+    networks:
+      - omni
+    deploy:
+      mode: global
+    depends_on:
+      - influxdb
+volumes:
+  influxdb-data:
+networks:
+  omni:
+    driver: overlay
+    driver_opts:
+      encrypted: "true"
+    attachable: true
