@@ -1,7 +1,7 @@
 FROM python:3.9-slim-buster
 
 # Dependencies for psutil lib to work
-RUN apk add --update gcc libc-dev linux-headers && rm -rf /var/cache/apk/*
+RUN apt update && apt upgrade -y && apt install -y gcc && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
