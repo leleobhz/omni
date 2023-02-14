@@ -7,10 +7,14 @@ from influxdb_client.client.write_api import SYNCHRONOUS
 from get_docker_secret import get_docker_secret
 
 influx_url = os.getenv('OMNI_INFLUX_URL')
-influx_token = get_docker_secret('OMNI_INFLUX_TOKEN')
+influx_token = get_docker_secret('OMNI_INFLUX_TOKEN_FILE', getEnv=False)
+if influx_token is None:
+    influx_token = os.getenv('OMNI_INFLUX_TOKEN')
+if influx_token is None:
+    raise ValueError("Influx Token not set")
+
 influx_bucket = os.getenv('OMNI_INFLUX_BUCKET')
 influx_org = os.getenv('OMNI_INFLUX_ORG')
-
 
 client = InfluxDBClient(url=influx_url, token=influx_token)
 write_api = client.write_api(write_options=SYNCHRONOUS)
