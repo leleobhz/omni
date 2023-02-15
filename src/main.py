@@ -4,15 +4,18 @@ from time import sleep
 
 from influxdb_client import InfluxDBClient
 from influxdb_client.client.write_api import SYNCHRONOUS
-from get_docker_secret import get_docker_secret
+
+def read_secret_or_env(env:str):
+    value=None
+    if os.path.isfile(os.getenv(env+"_FILE")):
+        with open(os.getenv(env+"_FILE")) as secret:
+            value = secret.read().rstrip('\n')
+    else:
+        value=os.getenv(env)
+    return value;
 
 influx_url = os.getenv('OMNI_INFLUX_URL')
-influx_token = get_docker_secret('OMNI_INFLUX_TOKEN_FILE')
-if influx_token is None:
-    influx_token = os.getenv('OMNI_INFLUX_TOKEN')
-if influx_token is None:
-    raise ValueError("Influx Token not set")
-
+influx_token = read_secret_or_env('OMNI_INFLUX_TOKEN')
 influx_bucket = os.getenv('OMNI_INFLUX_BUCKET')
 influx_org = os.getenv('OMNI_INFLUX_ORG')
 

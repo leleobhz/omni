@@ -1,3 +1,2 @@
 influxdb-client
 psutil
-get-docker-secret
