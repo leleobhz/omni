@@ -21,8 +21,17 @@ write_api = client.write_api(write_options=SYNCHRONOUS)
 data_rate = int(os.getenv('OMNI_DATA_RATE_SECONDS', 5))
 stats = Stats()
 
+max_tries=5
+current_tries=0;
+
 while True:
     print('Sending data...')
     data = stats.get_all(influx_format=True)
-    write_api.write(influx_bucket, influx_org, data)
+    try:
+        write_api.write(influx_bucket, influx_org, data)
+    except Exception as e:
+        print(e);
+        current_tries += 1
+        if current_tries >= max_tries:
+            exit()
     sleep(data_rate)
