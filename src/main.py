@@ -32,7 +32,7 @@ while True:
     except Exception as e:
         print("ERROR:", e);
         print()
-        current_tries += 1 if max_tries is not -1 else 0
-        if current_tries >= max_tries:
+        current_tries += 1
+        if current_tries >= max_tries and max_tries != -1:
             exit(1)
     sleep(data_rate)
