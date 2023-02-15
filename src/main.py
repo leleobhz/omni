@@ -30,8 +30,9 @@ while True:
     try:
         write_api.write(influx_bucket, influx_org, data)
     except Exception as e:
-        print(e);
+        print("ERROR:", e);
+        print()
         current_tries += 1
         if current_tries >= max_tries:
-            exit()
+            exit(1)
     sleep(data_rate)
