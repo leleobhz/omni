@@ -21,7 +21,7 @@ write_api = client.write_api(write_options=SYNCHRONOUS)
 data_rate = int(os.getenv('OMNI_DATA_RATE_SECONDS', 5))
 stats = Stats()
 
-max_tries=5
+max_tries=os.getenv('OMNI_MAX_ERRORS', default=5)
 current_tries=0;
 
 while True:
@@ -32,7 +32,7 @@ while True:
     except Exception as e:
         print("ERROR:", e);
         print()
-        current_tries += 1
+        current_tries += 1 if max_tries is not -1 else 0
         if current_tries >= max_tries:
             exit(1)
     sleep(data_rate)
