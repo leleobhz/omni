@@ -21,7 +21,7 @@ write_api = client.write_api(write_options=SYNCHRONOUS)
 data_rate = int(os.getenv('OMNI_DATA_RATE_SECONDS', 5))
 stats = Stats()
 
-max_tries=os.getenv('OMNI_MAX_ERRORS', default=5)
+max_tries=int(os.getenv('OMNI_MAX_ERRORS', default=5))
 current_tries=0;
 
 while True:
