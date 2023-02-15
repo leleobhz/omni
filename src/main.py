@@ -7,7 +7,7 @@ from influxdb_client.client.write_api import SYNCHRONOUS
 from get_docker_secret import get_docker_secret
 
 influx_url = os.getenv('OMNI_INFLUX_URL')
-influx_token = get_docker_secret('OMNI_INFLUX_TOKEN_FILE', getEnv=False)
+influx_token = get_docker_secret('OMNI_INFLUX_TOKEN_FILE')
 if influx_token is None:
     influx_token = os.getenv('OMNI_INFLUX_TOKEN')
 if influx_token is None:
