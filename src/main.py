@@ -7,7 +7,7 @@ from influxdb_client.client.write_api import SYNCHRONOUS
 
 def read_secret_or_env(env:str):
     value=None
-    if os.path.isfile(os.getenv(env+"_FILE")):
+    if os.path.isfile(str(os.getenv(env+"_FILE"))):
         with open(os.getenv(env+"_FILE")) as secret:
             value = secret.read().rstrip('\n')
     else:

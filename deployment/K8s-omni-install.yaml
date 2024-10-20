@@ -39,7 +39,7 @@ spec:
           path: /proc
       containers:
       - name: omni
-        image: mattogodoy/omni:arm
+        image: ghcr.io/leleobhz/omni:latest
         imagePullPolicy: Always
         envFrom:
         - configMapRef:

@@ -1,7 +1,4 @@
-FROM python:3.9-slim-buster
-
-# Dependencies for psutil lib to work
-RUN apt update && apt upgrade -y && apt install -y gcc && rm -rf /var/lib/apt/lists/*
+FROM python:3-slim
 
 WORKDIR /app
 
