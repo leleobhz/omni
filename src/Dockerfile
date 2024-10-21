@@ -1,13 +1,16 @@
+FROM python:3-slim as build
+
+COPY ./requirements.txt requirements.txt
+
+RUN apt -y update && \
+    apt -y install --no-install-recommends gcc && \
+    pip3 install -r requirements.txt
+
 FROM python:3-slim
 
 WORKDIR /app
 
-COPY ./requirements.txt requirements.txt
-RUN apt -y update && \
-    apt -y install gcc && \
-    pip3 install -r requirements.txt && \
-    apt -y purge gcc && \
-    rm -rf /var/lib/apt/lists/*
+COPY --from=build /usr/local/lib/ /usr/local/lib/
 
 COPY ./main.py ./stats.py ./
 
