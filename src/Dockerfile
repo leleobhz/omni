@@ -1,10 +1,11 @@
-FROM python:3.12-slim-bookworm as build
+FROM python:3.12-slim-bookworm AS build
 
 COPY ./requirements.txt requirements.txt
 
-RUN export clang_upstream_version=18 && \
-    export clang_debian_version=16 && \
-    export distro=$(cat /etc/os-release | grep VERSION_CODENAME= | cut -d= -f2) && \
+ARG clang_upstream_version=18
+ARG clang_debian_version=16
+
+RUN export distro=$(cat /etc/os-release | grep VERSION_CODENAME= | cut -d= -f2) && \
     export arch=$(dpkg --print-architecture) && \
     apt -y update && \
     apt -y install --no-install-recommends catatonit curl gpg && \
@@ -22,14 +23,13 @@ WORKDIR /app
 COPY ./main.py ./stats.py /app
 
 RUN export arch=$(dpkg --print-architecture) && \
-    bash -c 'if [[ "${arch}" == @(amd64|arm64|i386|s360x) ]] ; then ln -sv /usr/bin/clang++-${clang_upstream_version} /usr/bin/clang++ ; ln -sv /usr/bin/clang-${clang_upstream_version} /usr/bin/clang ; ln -sv /usr/bin/clang-cpp-${clang_upstream_version} /usr/bin/clang-cpp ; else ln -sv /usr/bin/clang++-${clang_debian_version} /usr/bin/clang++ ; ln -sv /usr/bin/clang-${clang_debian_version} /usr/bin/clang ; ln -sv /usr/bin/clang-cpp-${clang_debian_version} /usr/bin/clang-cpp ;  fi' && \
-    python3 -m nuitka --follow-imports --clang --include-plugin-directory=/app --standalone --onefile --output-filename=omni main.py
+    bash -c 'if [[ "${arch}" == @(amd64|arm64|i386|s360x) ]] ; then export CXX=/usr/bin/clang++-${clang_upstream_version} ; export CC=/usr/bin/clang-${clang_upstream_version} ; else export CXX=/usr/bin/clang++-${clang_debian_version} ; export CC=/usr/bin/clang-${clang_debian_version} ; fi && export && python3 -m nuitka --show-scons --clang --follow-imports --include-plugin-directory=/app --standalone --output-filename=omni main.py'
 
 FROM gcr.io/distroless/base-debian12:latest
 
 COPY --from=build --chmod=0755 /usr/libexec/podman/catatonit /catatonit
 COPY --from=build --chmod=0755 /librequirements /
-COPY --from=build --chmod=0755 /app/omni /
+COPY --from=build --chmod=0755 /app/main.dist /omni
 
 ENTRYPOINT [ "/catatonit", "--" ]
-CMD [ "/omni"]
+CMD [ "/omni/omni"]
