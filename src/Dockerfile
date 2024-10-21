@@ -12,7 +12,7 @@ RUN export distro=$(cat /etc/os-release | grep VERSION_CODENAME= | cut -d= -f2) 
     curl -fsSL https://apt.llvm.org/llvm-snapshot.gpg.key | gpg --dearmor -o /etc/apt/keyrings/llvm-snapshot.gpg && \
     echo "deb [arch=\"${arch}\" signed-by=/etc/apt/keyrings/llvm-snapshot.gpg] http://apt.llvm.org/${distro} llvm-toolchain-${distro}-${clang_upstream_version} main\ndeb-src [arch=\"${arch}\" signed-by=/etc/apt/keyrings/llvm-snapshot.gpg] http://apt.llvm.org/${distro} llvm-toolchain-${distro}-${clang_upstream_version} main" >> /etc/apt/sources.list.d/llvm.list && \
     apt -y update && \
-    bash -c 'if [[ "${arch}" == @(amd64|arm64|i386|s360x) ]] ; then echo "Arch clang: ${arch}" ; apt -y install --no-install-recommends gcc g++ patchelf clang-${clang_upstream_version} lldb-${clang_upstream_version} lld-${clang_upstream_version} ; else echo "Arch clang: ${arch}" ; apt -y install --no-install-recommends gcc g++ patchelf clang-${clang_debian_version} lldb-${clang_debian_version} lld-${clang_debian_version} ; fi' && \
+    bash -c 'if [[ "${arch}" == @(amd64|arm64|i386|s360x) ]] ; then echo "Arch clang: ${arch}" ; apt -y install --no-install-recommends gcc g++ libffi-dev patchelf clang-${clang_upstream_version} lldb-${clang_upstream_version} lld-${clang_upstream_version} ; else echo "Arch clang: ${arch}" ; apt -y install --no-install-recommends gcc g++ libffi-dev patchelf clang-${clang_debian_version} lldb-${clang_debian_version} lld-${clang_debian_version} ; fi' && \
     apt -y download zlib1g && \ 
     mkdir -p /librequirements && \
     dpkg -i --force-all --root=/librequirements zlib1g*.deb && \
