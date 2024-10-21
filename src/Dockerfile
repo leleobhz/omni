@@ -1,17 +1,35 @@
-FROM python:3-slim as build
+FROM python:3.12-slim-bookworm as build
 
 COPY ./requirements.txt requirements.txt
 
-RUN apt -y update && \
-    apt -y install build-essential python3-dev && \
-    pip3 install -r requirements.txt
-
-FROM python:3-slim
+RUN export clang_upstream_version=18 && \
+    export clang_debian_version=16 && \
+    export distro=$(cat /etc/os-release | grep VERSION_CODENAME= | cut -d= -f2) && \
+    export arch=$(dpkg --print-architecture) && \
+    apt -y update && \
+    apt -y install --no-install-recommends catatonit curl gpg && \
+    curl -fsSL https://apt.llvm.org/llvm-snapshot.gpg.key | gpg --dearmor -o /etc/apt/keyrings/llvm-snapshot.gpg && \
+    echo "deb [arch=\"${arch}\" signed-by=/etc/apt/keyrings/llvm-snapshot.gpg] http://apt.llvm.org/${distro} llvm-toolchain-${distro}-${clang_upstream_version} main\ndeb-src [arch=\"${arch}\" signed-by=/etc/apt/keyrings/llvm-snapshot.gpg] http://apt.llvm.org/${distro} llvm-toolchain-${distro}-${clang_upstream_version} main" >> /etc/apt/sources.list.d/llvm.list && \
+    apt -y update && \
+    bash -c 'if [[ "${arch}" == @(amd64|arm64|i386|s360x) ]] ; then echo "Arch clang: ${arch}" ; apt -y install build-essential patchelf clang-${clang_upstream_version} lldb-${clang_upstream_version} lld-${clang_upstream_version} ; else echo "Arch clang: ${arch}" ; apt -y install build-essential patchelf clang-${clang_debian_version} lldb-${clang_debian_version} lld-${clang_debian_version} ; fi' && \
+    apt -y download zlib1g && \ 
+    mkdir -p /librequirements && \
+    dpkg -i --force-all --root=/librequirements zlib1g*.deb && \
+    pip3 install -r requirements.txt && \
+    pip3 install nuitka
 
 WORKDIR /app
+COPY ./main.py ./stats.py /app
 
-COPY --from=build /usr/local/lib/ /usr/local/lib/
+RUN export arch=$(dpkg --print-architecture) && \
+    bash -c 'if [[ "${arch}" == @(amd64|arm64|i386|s360x) ]] ; then ln -sv /usr/bin/clang++-${clang_upstream_version} /usr/bin/clang++ ; ln -sv /usr/bin/clang-${clang_upstream_version} /usr/bin/clang ; ln -sv /usr/bin/clang-cpp-${clang_upstream_version} /usr/bin/clang-cpp ; fi' && \
+    python3 -m nuitka --follow-imports --clang --include-plugin-directory=/app --standalone --onefile --output-filename=omni main.py
 
-COPY ./main.py ./stats.py ./
+FROM gcr.io/distroless/base-debian12:latest
 
-CMD [ "python3" , "main.py"]
+COPY --from=build --chmod=0755 /usr/libexec/podman/catatonit /catatonit
+COPY --from=build --chmod=0755 /librequirements /
+COPY --from=build --chmod=0755 /app/omni /
+
+ENTRYPOINT [ "/catatonit", "--" ]
+CMD [ "/omni"]
