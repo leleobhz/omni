@@ -2,15 +2,15 @@ name: Docker
 
 on:
   push:
-    branches: [ "main" ]
-    #tags: [ 'v*.*.*' ]
-    paths: [src/**]
+    branches: [ "python" ]
+    paths:
+      - 'src/**'
+      - '.github/workflows/**'
   workflow_dispatch:
 
 env:
   # github.repository as <account>/<repo>
   IMAGE_NAME: ghcr.io/leleobhz/omni
-  IMAGE_TAG: 1.0.${{ github.run_number }}
 
 jobs:
   build:
@@ -51,7 +51,7 @@ jobs:
         with:
           images: ${{ env.IMAGE_NAME }}
           flavor: |
-            latest=true
+            latest=false
           tags: |
             type=schedule
             type=ref,event=branch
@@ -73,3 +73,5 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64,linux/arm64,linux/arm/v7
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
