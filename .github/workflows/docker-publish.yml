@@ -2,7 +2,7 @@ name: Docker
 
 on:
   push:
-    branches: [ "python" ]
+    branches: [ "nuitka" ]
     paths:
       - 'src/**'
       - '.github/workflows/**'
@@ -51,7 +51,7 @@ jobs:
         with:
           images: ${{ env.IMAGE_NAME }}
           flavor: |
-            latest=false
+            latest=true
           tags: |
             type=schedule
             type=ref,event=branch
